@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Travis Bot - Connect</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a0e1a; color: #fff; font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+.nav { background: #0d1b2a; border-bottom: 1px solid #1e3a5f; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.nav-logo { display: flex; align-items: center; gap: 10px; }
+.nav-logo span { font-size: 24px; }
+.nav-logo h1 { font-size: 18px; font-weight: 800; color: #00d4ff; }
+.nav-links { display: flex; gap: 16px; }
+.nav-links a { color: #888; font-size: 13px; text-decoration: none; cursor: pointer; }
+.nav-links a:hover { color: #00d4ff; }
+.hero { text-align: center; padding: 60px 20px 40px; }
+.hero-icon { font-size: 72px; margin-bottom: 16px; }
+.hero h1 { font-size: 36px; font-weight: 800; color: #00d4ff; margin-bottom: 8px; }
+.hero p { color: #888; font-size: 16px; max-width: 400px; margin: 0 auto 24px; }
+.live-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,255,136,0.1); border: 1px solid #00ff88; color: #00ff88; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; }
+.live-dot { width: 8px; height: 8px; background: #00ff88; border-radius: 50%; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.container { max-width: 480px; margin: 0 auto; padding: 0 20px 40px; }
+.card { background: #0d1b2a; border: 1px solid #1e3a5f; border-radius: 20px; padding: 24px; margin-bottom: 20px; }
+.card-title { font-size: 15px; font-weight: 700; color: #00d4ff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+label { display: block; font-size: 12px; color: #888; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+input { width: 100%; background: #0a0e1a; border: 1px solid #1e3a5f; color: #fff; padding: 14px; border-radius: 10px; font-size: 15px; outline: none; margin-bottom: 12px; transition: border 0.3s; }
+input:focus { border-color: #00d4ff; }
+.btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+.btn-primary { background: linear-gradient(135deg, #00d4ff, #0066ff); color: #fff; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(0,212,255,0.3); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.btn-gold { background: linear-gradient(135deg, #ffd700, #ff8800); color: #000; margin-top: 10px; }
+.btn-outline { background: transparent; border: 1px solid #00d4ff; color: #00d4ff; margin-top: 10px; }
+.code-box { display: none; background: #0a0e1a; border: 2px solid #00d4ff; border-radius: 14px; padding: 24px; margin-top: 16px; text-align: center; }
+.code { font-size: 40px; font-weight: 700; color: #00d4ff; letter-spacing: 12px; margin: 12px 0; font-family: monospace; }
+.steps { text-align: left; margin-top: 16px; }
+.step { display: flex; gap: 12px; margin-bottom: 12px; font-size: 13px; color: #ccc; align-items: flex-start; }
+.step-num { background: linear-gradient(135deg, #00d4ff, #0066ff); color: #fff; min-width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; flex-shrink: 0; margin-top: 1px; }
+.status { margin-top: 12px; font-size: 13px; padding: 12px 16px; border-radius: 10px; text-align: center; display: none; }
+.status.show { display: block; }
+.status.success { background: rgba(0,255,136,0.1); color: #00ff88; border: 1px solid #00ff88; }
+.status.error { background: rgba(255,68,68,0.1); color: #ff4444; border: 1px solid #ff4444; }
+.status.loading { background: rgba(0,212,255,0.1); color: #00d4ff; border: 1px solid #00d4ff; }
+.plans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.plan { background: #0a0e1a; border: 1px solid #1e3a5f; border-radius: 14px; padding: 16px; text-align: center; position: relative; }
+.plan.premium { border-color: #ffd700; }
+.plan.premium::before { content: '⭐ BEST'; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); background: #ffd700; color: #000; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 10px; }
+.plan-icon { font-size: 28px; margin-bottom: 8px; }
+.plan-name { font-size: 13px; color: #888; margin-bottom: 4px; }
+.plan-price { font-size: 24px; font-weight: 800; color: #00d4ff; }
+.plan.premium .plan-price { color: #ffd700; }
+.plan-period { font-size: 11px; color: #888; margin-top: 2px; }
+.features-list { list-style: none; }
+.features-list li { padding: 10px 0; border-bottom: 1px solid #1e3a5f; font-size: 13px; color: #ccc; display: flex; justify-content: space-between; align-items: center; }
+.features-list li:last-child { border: none; }
+.check { color: #00ff88; font-weight: 700; }
+.cross { color: #ff4444; }
+.badge-free { background: #1e3a5f; color: #888; font-size: 10px; padding: 2px 8px; border-radius: 10px; }
+.badge-premium { background: rgba(255,215,0,0.2); color: #ffd700; font-size: 10px; padding: 2px 8px; border-radius: 10px; border: 1px solid #ffd700; }
+.info-box { border-radius: 12px; padding: 16px; margin-top: 12px; font-size: 13px; }
+.info-box.warning { background: rgba(255,165,0,0.1); border: 1px solid #ff8800; color: #ffaa44; }
+.info-box.gold { background: rgba(255,215,0,0.1); border: 1px solid #ffd700; color: #ffd700; }
+.info-box.blue { background: rgba(0,212,255,0.1); border: 1px solid #00d4ff; color: #00d4ff; }
+.info-box h4 { margin-bottom: 6px; font-size: 14px; }
+.section { padding: 0 20px 40px; max-width: 480px; margin: 0 auto; }
+.section-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 16px; }
+.faq-item { background: #0d1b2a; border: 1px solid #1e3a5f; border-radius: 12px; padding: 16px; margin-bottom: 10px; }
+.faq-q { font-size: 14px; font-weight: 600; color: #00d4ff; margin-bottom: 6px; }
+.faq-a { font-size: 13px; color: #888; }
+.payment-methods { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.payment-badge { background: #0a0e1a; border: 1px solid #1e3a5f; border-radius: 8px; padding: 8px 14px; font-size: 12px; color: #ccc; }
+footer { text-align: center; padding: 30px 20px; border-top: 1px solid #1e3a5f; color: #888; font-size: 13px; }
+footer a { color: #00d4ff; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-logo">
+    <span>🤖</span>
+    <h1>Travis Bot</h1>
+  </div>
+  <div class="nav-links">
+    <a onclick="scrollTo('connect')">Connect</a>
+    <a onclick="scrollTo('plans')">Plans</a>
+    <a onclick="scrollTo('faq')">FAQ</a>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-icon">🤖</div>
+  <h1>Travis Bot</h1>
+  <p>AI-Powered WhatsApp Assistant with voice notes, music, jokes and more!</p>
+  <div class="live-badge"><div class="live-dot"></div> BOT IS LIVE</div>
+</div>
+
+<div class="container" id="connect">
+  <div class="card">
+    <div class="card-title">🔗 Connect Your WhatsApp</div>
+    <label>Your WhatsApp Number (with country code)</label>
+    <input type="tel" id="phone" placeholder="e.g. 2348012345678" oninput="checkUser()" />
+    <div id="user-status"></div>
+    <button class="btn btn-primary" onclick="getCode()" id="btn">🔗 Get Pairing Code</button>
+    <div class="code-box" id="code-box">
+      <p style="color:#888; font-size:13px; margin-bottom:4px;">Your pairing code:</p>
+      <div class="code" id="code-display">----</div>
+      <p style="color:#888; font-size:11px;">Code expires in 60 seconds</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div>Open WhatsApp on your phone</div>
+        <div class="step"><div class="step-num">2</div>Tap ⋮ → Linked Devices</div>
+        <div class="step"><div class="step-num">3</div>Tap "Link a Device"</div>
+        <div class="step"><div class="step-num">4</div>Tap "Link with phone number instead"</div>
+        <div class="step"><div class="step-num">5</div>Enter the code above</div>
+      </div>
+    </div>
+    <div class="status" id="status"></div>
+  </div>
+</div>
+
+<div class="section" id="plans">
+  <div class="section-title">💎 Choose Your Plan</div>
+  <div class="card">
+    <div class="plans-grid">
+      <div class="plan">
+        <div class="plan-icon">🆓</div>
+        <div class="plan-name">Free Trial</div>
+        <div class="plan-price">€0</div>
+        <div class="plan-period">4 days, re-pair required</div>
+      </div>
+      <div class="plan premium">
+        <div class="plan-icon">👑</div>
+        <div class="plan-name">Premium</div>
+        <div class="plan-price">€10</div>
+        <div class="plan-period">Lifetime — never expires</div>
+      </div>
+    </div>
+    <ul class="features-list">
+      <li>🤖 AI Chat Replies <div><span class="check">✓</span> <span class="check">✓</span></div></li>
+      <li>🎵 Play & Sing Songs <div><span class="check">✓</span> <span class="check">✓</span></div></li>
+      <li>🔊 British Voice Notes <div><span class="check">✓</span> <span class="check">✓</span></div></li>
+      <li>😂 Jokes, Facts, Riddles <div><span class="check">✓</span> <span class="check">✓</span></div></li>
+      <li>🌤️ Weather & Calculator <div><span class="check">✓</span> <span class="check">✓</span></div></li>
+      <li>💱 Currency Converter <div><span class="check">✓</span> <span class="check">✓</span></div></li>
+      <li>🌍 Translator <div><span class="check">✓</span> <span class="check">✓</span></div></li>
+      <li>♾️ Pair once, forever <div><span class="cross">✗</span> <span class="check">✓</span></div></li>
+      <li>⚡ Priority support <div><span class="cross">✗</span> <span class="check">✓</span></div></li>
+      <li>🔄 Re-pair every 4 days <div><span class="badge-free">Required</span> <span class="badge-premium">Never</span></div></li>
+    </ul>
+    <div class="info-box warning" style="margin-top:16px">
+      <h4>⚠️ Free Trial</h4>
+      Bot stops working every 4 days. Visit this site to re-pair and continue using it free!
+    </div>
+    <div class="info-box gold" style="margin-top:12px">
+      <h4>👑 Premium — One-time €10</h4>
+      Pay once, connected forever. No re-pairing, no expiry, no hassle.
+    </div>
+    <button class="btn btn-gold" onclick="document.getElementById('payment').scrollIntoView({behavior:'smooth'})">💳 Subscribe for €10 Lifetime</button>
+  </div>
+</div>
+
+<div class="section" id="payment">
+  <div class="section-title">💳 How to Pay</div>
+  <div class="card">
+    <div class="info-box blue">
+      <h4>👑 Lifetime Premium — €10 one-time</h4>
+      <p style="margin-top:6px">After payment, your number will be activated within 5 minutes.</p>
+    </div>
+    <div style="margin-top:16px">
+      <label>Payment Methods</label>
+      <div class="payment-methods">
+        <div class="payment-badge">💳 PayPal</div>
+        <div class="payment-badge">🌍 Wise</div>
+        <div class="payment-badge">📱 Opay</div>
+        <div class="payment-badge">🏦 Bank Transfer</div>
+        <div class="payment-badge">₿ Crypto</div>
+      </div>
+    </div>
+    <div style="margin-top:20px; padding:16px; background:#0a0e1a; border-radius:12px; border:1px solid #1e3a5f;">
+      <p style="font-size:13px; color:#888; margin-bottom:12px;">Contact us to pay:</p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <a href="https://t.me/travis_codes" target="_blank" style="display:flex; align-items:center; gap:10px; background:#0d1b2a; padding:12px; border-radius:10px; border:1px solid #1e3a5f; text-decoration:none; color:#fff; font-size:14px;">
+          <span style="font-size:20px;">✈️</span> @travis_codes on Telegram
+        </a>
+        <div style="display:flex; align-items:center; gap:10px; background:#0d1b2a; padding:12px; border-radius:10px; border:1px solid #1e3a5f; font-size:14px; color:#fff;">
+          <span style="font-size:20px;">📱</span> WhatsApp: +2348142291654
+        </div>
+      </div>
+    </div>
+    <div class="info-box warning" style="margin-top:12px">
+      📸 Send payment proof + your WhatsApp number and you'll be activated within 5 minutes!
+    </div>
+  </div>
+</div>
+
+<div class="section" id="faq">
+  <div class="section-title">❓ FAQ</div>
+  <div class="faq-item">
+    <div class="faq-q">What happens after 4 days on the free trial?</div>
+    <div class="faq-a">The bot stops responding. Simply come back to this site, enter your number and get a new pairing code to continue for another 4 days — completely free.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Is re-pairing really free forever?</div>
+    <div class="faq-a">Yes! You can re-pair every 4 days for free as many times as you want. Premium just saves you the hassle.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">What does Premium include?</div>
+    <div class="faq-a">Lifetime access — pair once and never worry about re-pairing again. All features are the same as the free trial.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">How fast is activation after payment?</div>
+    <div class="faq-a">Within 5 minutes. You'll receive a WhatsApp message confirming your activation.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">What commands does the bot have?</div>
+    <div class="faq-a">Type "menu" on WhatsApp after connecting to see all commands: play songs, sing songs, AI chat, jokes, facts, riddles, weather, calculator, currency converter, translator and more!</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q">Is my WhatsApp safe?</div>
+    <div class="faq-a">Yes. The bot uses official WhatsApp linking (same as WhatsApp Web). You can unlink anytime from WhatsApp → Linked Devices.</div>
+  </div>
+</div>
+
+<footer>
+  <p>🤖 <strong>Travis Bot</strong> — AI-Powered WhatsApp Assistant</p>
+  <p style="margin-top:8px">Built with ❤️ by <a href="https://t.me/travis_codes">@travis_codes</a></p>
+  <p style="margin-top:8px; font-size:11px;">⚠️ Not affiliated with WhatsApp or Meta</p>
+</footer>
+
+<script>
+function scrollTo(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+
+async function checkUser() {
+  const phone = document.getElementById('phone').value.trim().replace(/\D/g, '');
+  const userStatus = document.getElementById('user-status');
+  if (phone.length < 10) { userStatus.innerHTML = ''; return; }
+  try {
+    const res = await fetch(`/check-user?phone=${phone}`);
+    const data = await res.json();
+    if (data.exists) {
+      if (data.premium) {
+        userStatus.innerHTML = `<div class="info-box gold" style="margin-bottom:12px"><h4>👑 Premium User</h4>You have lifetime access!</div>`;
+      } else if (data.expired) {
+        userStatus.innerHTML = `<div class="info-box warning" style="margin-bottom:12px"><h4>⏰ Trial Expired</h4>Re-pair below to continue free for another 4 days!</div>`;
+      } else {
+        userStatus.innerHTML = `<div class="info-box blue" style="margin-bottom:12px"><h4>✅ Active Trial</h4>${data.daysLeft} day(s) remaining on your free trial.</div>`;
+      }
+    }
+  } catch (e) {}
+}
+
+async function getCode() {
+  const phone = document.getElementById('phone').value.trim().replace(/\D/g, '');
+  const btn = document.getElementById('btn');
+  const status = document.getElementById('status');
+
+  if (!phone || phone.length < 10) {
+    status.className = 'status error show';
+    status.textContent = '❌ Please enter a valid phone number with country code';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Getting code...';
+  status.className = 'status loading show';
+  status.textContent = '🔄 Requesting pairing code...';
+
+  try {
+    const res = await fetch('/pair', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone }),
+    });
+    const data = await res.json();
+
+    if (data.code) {
+      document.getElementById('code-box').style.display = 'block';
+      document.getElementById('code-display').textContent = data.code;
+      if (data.premium) {
+        status.className = 'status success show';
+        status.textContent = '✅ Welcome back! You have LIFETIME access!';
+      } else {
+        status.className = 'status success show';
+        status.textContent = `✅ Code ready! Free trial: ${data.daysLeft} day(s) after pairing.`;
+      }
+      btn.textContent = '🔄 Get New Code';
+      btn.disabled = false;
+    } else {
+      status.className = 'status error show';
+      status.textContent = '❌ ' + (data.error || 'Failed. Try again.');
+      btn.disabled = false;
+      btn.textContent = '🔗 Get Pairing Code';
+    }
+  } catch (err) {
+    status.className = 'status error show';
+    status.textContent = '❌ Server error. Try again later.';
+    btn.disabled = false;
+    btn.textContent = '🔗 Get Pairing Code';
+  }
+}
+</script>
+</body>
+  </html>
+        
